@@ -86,7 +86,7 @@ static void *play(void *j)
 
 struct pw_stream *pw;struct pw_main_loop *pl;
 
-// AudioUnit Callback;
+// Pipewire Callback;
 static void queue_audio(void *u) 
 {
 	if(be-bb<4096){return;};
@@ -131,7 +131,10 @@ static void queue_audio(void *u)
 // Destroy Playback;
 static void free_play(void *j)
 {
-  pw_stream_destroy(pw);pw_main_loop_destroy(pl);pw_deinit();
+	if(pw){pw_stream_destroy(pw);};
+	if(pl){pw_main_loop_destroy(pl);};
+
+	pw_deinit();
 };
 
 // Playback Setup;
@@ -176,9 +179,9 @@ static inline int destroy()
 	if(*(sz->thr+1)!=0)
 	{
 		#if __linux__
-		pthread_cancel(*(sz->thr+1));
+		pthread_cancel(*(sz->thr+1));pthread_join(*(sz->thr+1),0);
 		#else
-		AudioQueueDispose(qu,1);
+		AudioQueueStop(qu,1);AudioQueueDispose(qu,1);
 		#endif
 
 		*(sz->thr+1)=0;
